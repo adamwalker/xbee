@@ -103,18 +103,20 @@ txStat = do
     unless (checkCSum $ [0x89, txFrameID, txStatus, cs]) (fail "checksum failed")
     return TXStatus {..}
 
-packetsPipe :: Monad m => Parser a -> Pipe ByteString a m r
+packetsPipe :: MonadIO m => Parser a -> Pipe ByteString a m r
 packetsPipe parser = do
     res <- await
     packetsPipe' (parse parser) res
     where
     packetsPipe' p txt = 
         case p txt of
-            A.Fail    input _ _ -> case BS.uncons input of
-                Nothing        -> do
-                    res <- await
-                    packetsPipe' (parse parser) res
-                Just (_, rest) -> packetsPipe' (parse parser) rest
+            A.Fail    input x y -> do
+                liftIO $ putStrLn ("Parsing failed: " ++ show x ++ " : " ++ show y)
+                case BS.uncons input of
+                    Nothing        -> do
+                        res <- await
+                        packetsPipe' (parse parser) res
+                    Just (_, rest) -> packetsPipe' (parse parser) rest
             A.Partial cont      -> do
                 res <- await
                 packetsPipe' cont res
