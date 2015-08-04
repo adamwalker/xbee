@@ -110,7 +110,7 @@ packetsPipe parser = do
         case p txt of
             A.Fail    input x y -> do
                 liftIO $ putStrLn ("Parsing failed: " ++ show x ++ " : " ++ show y)
-                case BS.uncons input of
+                case BS.uncons txt of
                     Nothing        -> do
                         res <- await
                         packetsPipe' (parse parser) res
