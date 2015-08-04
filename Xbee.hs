@@ -69,13 +69,10 @@ getWord8Escaped = do
 
 receive :: Parser RecvPacket
 receive = do
-    start       <- anyWord8 
-    when (start /= 0x7e) (fail "start byte wrong")
-    msb         <- anyWord8
-    when (msb /= 0) (fail "msb wrong")
+    word8 0x7e --start byte
+    word8 0x00 --msb
     lsb         <- getWord8Escaped
-    cmd         <- getWord8Escaped
-    when (cmd /= 0x81) (fail "not a receive packet")
+    word8 0x81 --cmd
     addressMSB  <- getWord8Escaped
     addressLSB  <- getWord8Escaped
     let sourceAddr = (fromIntegral addressMSB `shift` 8) .|. fromIntegral addressLSB
