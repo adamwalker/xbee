@@ -62,6 +62,7 @@ getWord8Escaped :: Parser Word8
 getWord8Escaped = do
     res <- anyWord8
     case res of
+        0x7e -> fail "unexpected start of packet"
         0x7d -> do
             res <- anyWord8
             return $ 0x20 `xor` res
